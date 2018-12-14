@@ -1,0 +1,87 @@
+#include <Wire.h>
+#include <LCD.h>
+#include <LiquidCrystal_I2C.h>
+#include "DHT.h"
+
+#define DHTPIN 2     // what digital pin we're connected to
+
+#define DHTTYPE DHT21   // DHT 21
+
+DHT dht(DHTPIN, DHTTYPE); // DHT 21
+
+
+
+#define I2C_ADDR    0x3F // <<----- Add your address here.  Find it from I2C Scanner
+#define BACKLIGHT_PIN     3 //
+#define En_pin  2 // LCD
+#define Rw_pin  1 // LCD
+#define Rs_pin  0 // LCD
+#define D4_pin  4 // LCD
+#define D5_pin  5 // LCD
+#define D6_pin  6 // LCD
+#define D7_pin  7  //LCD
+
+
+int n = 1; // LCD
+
+LiquidCrystal_I2C  lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin); // LCD
+
+void setup()
+{
+  lcd.begin (16,2); //  <<----- My LCD was 16x2
+
+// Switch on the backlight
+lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
+lcd.setBacklight(HIGH);
+lcd.home (); // go home
+
+ Serial.begin(9600);
+ //Serial.println("DHTxx test!");
+
+  dht.begin();
+}
+
+
+
+void loop() {
+  
+  delay(10000); //시간 설정 (&*1s/1000)
+
+  
+  float huminity = dht.readHumidity();
+
+  float tempC = dht.readTemperature();
+
+  float f = dht.readTemperature(true);
+
+  /*if (isnan(h) || isnan(t) || isnan(f)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }*/
+
+  float hif = dht.computeHeatIndex(f, huminity);
+  float hic = dht.computeHeatIndex(tempC, huminity, false);
+
+
+  //Serial.print();
+  Serial.print(tempC);
+  //Serial.print(" \t");
+  //Serial.print();
+  Serial.print(" , ");
+  Serial.println(huminity);
+  //Serial.print();
+  //Serial.print("\t");
+  //Serial.print();
+  //Serial.print(hif);
+  //Serial.println();
+
+ lcd.backlight();
+    
+    lcd.print("TEMP:     ");
+    lcd.print(tempC);
+    lcd.setCursor(0,1);
+    lcd.print("HUMIDITY:  ");
+    lcd.print(huminity);
+
+
+}
